@@ -1,22 +1,39 @@
 import 'package:flutter/material.dart';
+import 'music_player_screen.dart';
 import 'playlist_screen.dart';
 
 class HomeScreen extends StatelessWidget {
+  const HomeScreen({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Music Player'),
+        title: const Text('Music Player'),
       ),
       body: Center(
-        child: ElevatedButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => PlaylistScreen()),
-            );
-          },
-          child: Text('Go to Playlists'),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const MusicPlayerScreen()),
+                );
+              },
+              child: const Text('Music Player'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const PlaylistScreen()),
+                );
+              },
+              child: const Text('Playlists'),
+            ),
+          ],
         ),
       ),
     );

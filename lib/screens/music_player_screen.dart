@@ -1,72 +1,48 @@
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
-import 'package:file_picker/file_picker.dart';
+import 'package:music_player_app4/services/playlist_service.dart';
 
 class MusicPlayerScreen extends StatefulWidget {
+  const MusicPlayerScreen({Key? key}) : super(key: key);
+
   @override
   _MusicPlayerScreenState createState() => _MusicPlayerScreenState();
 }
 
 class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
-  late AudioPlayer _audioPlayer;
-  bool isPlaying = false;
-  String currentSongPath = '';
+  final AudioPlayer _audioPlayer = AudioPlayer();
+  List<Map<String, dynamic>> _songs = [];
 
   @override
   void initState() {
     super.initState();
-    _audioPlayer = AudioPlayer();
+    _loadSongs();
   }
 
-  Future<void> _playMusic(String path) async {
-    if (isPlaying) {
-      await _audioPlayer.stop();
-    }
-    Source audioSource = DeviceFileSource(path);  // Mengonversi String ke Source
-    await _audioPlayer.play(audioSource);
-    setState(() {
-      currentSongPath = path;
-      isPlaying = true;
-    });
+  Future<void> _loadSongs() async {
+    PlaylistService playlistService = PlaylistService();
+    _songs = await playlistService.getSongs(1); // Misalnya untuk playlist dengan id 1
+    setState(() {});
   }
 
-  Future<void> _pickFile() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(type: FileType.audio);
-    if (result != null) {
-      String path = result.files.single.path!;
-      _playMusic(path);
-    }
+  void _playSong(String path) {
+    _audioPlayer.play(DeviceFileSource(path));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Music Player'),
+        title: const Text('Music Player'),
       ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          if (currentSongPath.isNotEmpty)
-            Text('Playing: $currentSongPath'),
-          SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: _pickFile,
-            child: Text('Pick and Play Music'),
-          ),
-          SizedBox(height: 20),
-          if (isPlaying)
-            ElevatedButton(
-              onPressed: () async {
-                await _audioPlayer.stop();
-                setState(() {
-                  isPlaying = false;
-                  currentSongPath = '';
-                });
-              },
-              child: Text('Stop Music'),
-            ),
-        ],
+      body: ListView.builder(
+        itemCount: _songs.length,
+        itemBuilder: (context, index) {
+          return ListTile(
+            title: Text(_songs[index]['title']),
+            onTap: () => _playSong(_songs[index]['path']),
+          );
+        },
       ),
     );
   }
