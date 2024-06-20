@@ -1,13 +1,9 @@
-import 'dart:async';
-import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:path/path.dart';
+import 'dart:io';
+import 'models/playlist.dart';
 
 class DBHelper {
-  static final DBHelper _instance = DBHelper._internal();
-  factory DBHelper() => _instance;
-
-  DBHelper._internal();
-
   static Database? _database;
 
   Future<Database> get database async {
@@ -17,27 +13,36 @@ class DBHelper {
   }
 
   Future<Database> _initDB() async {
-    String path = join(await getDatabasesPath(), 'music.db');
-    return await openDatabase(path, version: 1, onCreate: _onCreate);
+    String path = join(await getDatabasesPath(), 'playlist.db');
+    return await openDatabase(
+      path,
+      onCreate: (db, version) async {
+        await db.execute('''
+          CREATE TABLE playlists(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT,
+            songs TEXT
+          )
+        ''');
+      },
+      version: 1,
+    );
   }
 
-  Future<void> _onCreate(Database db, int version) async {
-    await db.execute('''
-      CREATE TABLE songs (
-        id INTEGER PRIMARY KEY,
-        title TEXT,
-        path TEXT
-      )
-    ''');
-  }
-
-  Future<void> insertSong(Map<String, dynamic> song) async {
+  Future<void> insertPlaylist(Playlist playlist) async {
     final db = await database;
-    await db.insert('songs', song, conflictAlgorithm: ConflictAlgorithm.replace);
+    await db.insert('playlists', {
+      'name': playlist.name,
+      'songs': playlist.songs.map((file) => file.path).join(',')
+    });
   }
 
-  Future<List<Map<String, dynamic>>> getSongs() async {
+  Future<List<Playlist>> getPlaylists() async {
     final db = await database;
-    return await db.query('songs');
+    final List<Map<String, dynamic>> maps = await db.query('playlists');
+    return List.generate(maps.length, (i) {
+      List<File> songs = maps[i]['songs'].split(',').map((path) => File(path)).toList();
+      return Playlist(name: maps[i]['name'], songs: songs);
+    });
   }
 }
