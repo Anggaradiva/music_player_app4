@@ -6,6 +6,8 @@ class ThemeNotifier extends ChangeNotifier {
   SharedPreferences? _prefs;
   bool _isDarkTheme;
 
+  var darkTheme;
+
   bool get isDarkTheme => _isDarkTheme;
 
   ThemeNotifier() : _isDarkTheme = false {

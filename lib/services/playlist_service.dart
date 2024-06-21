@@ -23,24 +23,24 @@ class PlaylistService {
   Future<void> _onCreate(Database db, int version) async {
     await db.execute('''
       CREATE TABLE playlists (
-        id INTEGER PRIMARY KEY,
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT
       )
     ''');
     await db.execute('''
-      CREATE TABLE songs (
-        id INTEGER PRIMARY KEY,
-        playlistId INTEGER,
-        title TEXT,
-        path TEXT,
-        FOREIGN KEY (playlistId) REFERENCES playlists (id)
+      CREATE TABLE playlist_songs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        playlist_id INTEGER,
+        song_id INTEGER,
+        FOREIGN KEY (playlist_id) REFERENCES playlists (id),
+        FOREIGN KEY (song_id) REFERENCES songs (id)
       )
     ''');
   }
 
-  Future<void> insertPlaylist(Map<String, dynamic> playlist) async {
+  Future<int> insertPlaylist(Map<String, dynamic> playlist) async {
     final db = await database;
-    await db.insert('playlists', playlist, conflictAlgorithm: ConflictAlgorithm.replace);
+    return await db.insert('playlists', playlist);
   }
 
   Future<List<Map<String, dynamic>>> getPlaylists() async {
@@ -48,13 +48,17 @@ class PlaylistService {
     return await db.query('playlists');
   }
 
-  Future<void> insertSong(Map<String, dynamic> song) async {
+  Future<int> updatePlaylist(int id, Map<String, dynamic> playlist) async {
     final db = await database;
-    await db.insert('songs', song, conflictAlgorithm: ConflictAlgorithm.replace);
+    return await db.update('playlists', playlist, where: 'id = ?', whereArgs: [id]);
   }
 
-  Future<List<Map<String, dynamic>>> getSongs(int playlistId) async {
+  Future<int> deletePlaylist(int id) async {
     final db = await database;
-    return await db.query('songs', where: 'playlistId = ?', whereArgs: [playlistId]);
+    return await db.delete('playlists', where: 'id = ?', whereArgs: [id]);
   }
+
+  getSongs(int playlistId) {}
+
+  insertSong(Map<String, Object?> map) {}
 }
