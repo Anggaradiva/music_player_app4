@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'screens/home_screen.dart';
 import 'package:provider/provider.dart';
 import 'theme_notifier.dart';
+import 'screens/home_screen.dart'; // Sesuaikan jalur impor ini
 
 void main() {
   runApp(MyApp());
@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
         builder: (context, notifier, child) {
           return MaterialApp(
             title: 'Music Player',
-            theme: notifier.darkTheme ? dark : light,
+            theme: notifier.darkTheme ? ThemeData.dark() : ThemeData.light(),
             home: HomeScreen(),
           );
         },
@@ -24,11 +24,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
-final dark = ThemeData(
-  brightness: Brightness.dark,
-);
-
-final light = ThemeData(
-  brightness: Brightness.light,
-);

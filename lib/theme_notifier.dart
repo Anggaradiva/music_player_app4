@@ -2,36 +2,28 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ThemeNotifier extends ChangeNotifier {
-  final String key = "theme";
-  SharedPreferences? _prefs;
-  bool _isDarkTheme;
+  bool _darkTheme = false; // Inisialisasi dengan nilai default false
 
-  var darkTheme;
+  bool get darkTheme => _darkTheme;
 
-  bool get isDarkTheme => _isDarkTheme;
-
-  ThemeNotifier() : _isDarkTheme = false {
+  ThemeNotifier() {
     _loadFromPrefs();
   }
 
   toggleTheme() {
-    _isDarkTheme = !_isDarkTheme;
+    _darkTheme = !_darkTheme;
     _saveToPrefs();
     notifyListeners();
   }
 
   _loadFromPrefs() async {
-    await _initPrefs();
-    _isDarkTheme = _prefs?.getBool(key) ?? false;
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    _darkTheme = prefs.getBool('darkTheme') ?? false; // Mengatur nilai default false jika null
     notifyListeners();
   }
 
   _saveToPrefs() async {
-    await _initPrefs();
-    _prefs?.setBool(key, _isDarkTheme);
-  }
-
-  _initPrefs() async {
-    _prefs = await SharedPreferences.getInstance();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool('darkTheme', _darkTheme);
   }
 }
